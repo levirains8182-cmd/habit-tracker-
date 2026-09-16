@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>56 Day Habit Challenge</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f5f7;color:#202124}
+.app{max-width:900px;margin:30px auto;padding:24px}
+h1{margin:0 0 6px;font-size:34px}.sub{color:#666;margin-bottom:24px}
+.top{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+button{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;background:#222;color:white}
+input{padding:11px;border:1px solid #ccc;border-radius:10px;font-size:15px}
+.card{background:white;border-radius:18px;padding:20px;box-shadow:0 4px 18px #00000012;margin-bottom:18px}
+.progress{height:14px;background:#e6e6e6;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:#222;transition:.25s}
+.stats{display:flex;justify-content:space-between;margin:10px 0 18px;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day{min-height:76px;border:1px solid #ddd;border-radius:12px;padding:8px;background:#fafafa;cursor:pointer}
+.day:hover{border-color:#888}.day.done{background:#dff5e4;border-color:#79bf89}.num{font-weight:800}.status{font-size:12px;color:#666;margin-top:8px}
+.folder{position:fixed;right:20px;bottom:20px;background:#222;color:white;padding:14px 18px;border-radius:14px;cursor:pointer;box-shadow:0 5px 20px #0003}
+#completed{display:none}.completedItem{padding:8px 0;border-bottom:1px solid #eee}
+.reset{background:#777}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>56 Day Habit Challenge</h1>
+  <div class="sub">Build consistency one day at a time.</div>
+
+  <div class="top">
+    <input id="habit" placeholder="Enter your habit" value="My Habit">
+    <button onclick="saveHabit()">Save Habit</button>
+    <button class="reset" onclick="resetChallenge()">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="stats"><span id="habitName">My Habit</span><span id="count">0 / 56</span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="folder" onclick="toggleCompleted()">📁 Completed <span id="completedCount">0</span></div>
+<div class="card" id="completed">
+  <h2>Completed Days</h2>
+  <div id="completedList"></div>
+</div>
+
+<script>
+const KEY="habit56";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"habit":"My Habit","done":[]}');
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function render(){
+ document.getElementById("habit").value=data.habit;
+ document.getElementById("habitName").textContent=data.habit;
+ document.getElementById("count").textContent=`${data.done.length} / 56`;
+ document.getElementById("bar").style.width=(data.done.length/56*100)+"%";
+ document.getElementById("completedCount").textContent=data.done.length;
+ const grid=document.getElementById("grid"); grid.innerHTML="";
+ for(let i=1;i<=56;i++){
+   const d=document.createElement("div"); d.className="day"+(data.done.includes(i)?" done":"");
+   d.innerHTML=`<div class="num">Day ${i}</div><div class="status">${data.done.includes(i)?"Completed ✓":"Not completed"}</div>`;
+   d.onclick=()=>toggleDay(i); grid.appendChild(d);
+ }
+ const list=document.getElementById("completedList"); list.innerHTML="";
+ [...data.done].sort((a,b)=>a-b).forEach(i=>{
+   const x=document.createElement("div"); x.className="completedItem"; x.textContent=`Day ${i} — Completed ✓`;
+   list.appendChild(x);
+ });
+}
+function toggleDay(i){
+ const p=data.done.indexOf(i);
+ if(p>=0)data.done.splice(p,1); else data.done.push(i);
+ save();render();
+}
+function saveHabit(){
+ const v=document.getElementById("habit").value.trim();
+ if(v){data.habit=v;save();render()}
+}
+function resetChallenge(){
+ if(confirm("Reset all 56 days?")){
+   data.done=[];save();render();
+ }
+}
+function toggleCompleted(){
+ const el=document.getElementById("completed");
+ el.style.display=el.style.display==="none"?"block":"none";
+}
+render();
+</script>
+</body>
+</html>
